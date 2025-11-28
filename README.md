@@ -40,6 +40,33 @@ graph TB
     style F fill:#e0f2f1
 ```
 
+```
++-------------------+     +---------------------+
+|     Cursor        |     |   Firebase Hosting  |
+| (Local Agentic IDE|<--->|   (Frontend UI)     |
++-------------------+     +---------------------+
+          ^                       ^
+          |                       |
+          +----------+------------+
+                     |
+              +------+------+
+              | Vertex AI    |
+              | Agent Garden |  <--- CrewAI agents deployed here
+              | (Managed)    |
+              +------+------+
+                     |
+        +------------+-------------+
+        |            |             |
+   +----+----+  +----+----+   +----+----+
+   | LangChain| |  Tools  |   | LangSmith|
+   +----------+ +---------+   +----------+
+                     |
+              +------+------+
+              | Gemini /     |
+              | Grok / etc   |
+              +--------------+
+```
+
 Frontend: Pure HTML/CSS/JS (no framework)
 
 Backend: Firebase Functions (Gen2, Python 3.12, 512MiB)
