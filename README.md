@@ -51,7 +51,7 @@ graph TB
                      |
               +------+------+
               | Vertex AI    |
-              | Agent Garden |  <--- CrewAI agents deployed here
+              | Agent Garden |  <--- agents deployed here
               | (Managed)    |
               +------+------+
                      |
