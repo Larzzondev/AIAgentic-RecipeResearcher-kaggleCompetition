@@ -1,0 +1,8 @@
+firebase-admin>=6.2.0
+firebase-functions>=0.1.0
+google-auth>=2.22.0
+requests>=2.31.0
+# Add these for the Agent Engine SDK
+google-cloud-aiplatform[agent_engines,adk]>=1.71.0
+google-adk>=0.13.0
+

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recipe Researcher - AI Recipe Agent</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 2rem;
+        color: #333;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+      }
+
+      .header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 1rem;
+      }
+
+      .agent-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(255,255,255,0.2);
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        backdrop-filter: blur(10px);
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        background: #4ade80;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+
+      .main-content {
+        padding: 2rem;
+      }
+
+      .form-section {
+        margin-bottom: 2rem;
+      }
+
+      .form-section h2 {
+        color: #2d3748;
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #4a5568;
+        font-size: 0.95rem;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #f8fafc;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .form-group input::placeholder {
+        color: #a0aec0;
+      }
+
+      .submit-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+      }
+
+      .submit-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .loading {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+      }
+
+      .loading.show {
+        display: block;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      .response-section {
+        margin-top: 2rem;
+      }
+
+      .response-section h2 {
+        color: #2d3748;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .response-card {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        white-space: pre-wrap;
+        line-height: 1.5;
+        max-height: 400px;
+        overflow-y: auto;
+        font-size: 0.9rem;
+      }
+
+      .response-card.success {
+        border-color: #48bb78;
+        background: #f0fff4;
+      }
+
+      .response-card.error {
+        border-color: #f56565;
+        background: #fed7d7;
+      }
+
+      .examples {
+        background: #edf2f7;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+      }
+
+      .examples h3 {
+        color: #2d3748;
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+      }
+
+      .example-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+      }
+
+      .example-item {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .example-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      }
+
+      .example-query {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.25rem;
+      }
+
+      .example-constraint {
+        color: #718096;
+        font-size: 0.9rem;
+      }
+
+      .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e2e8f0;
+      }
+
+      .feature {
+        text-align: center;
+        padding: 1rem;
+      }
+
+      .feature-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .feature h4 {
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+      }
+
+      .feature p {
+        color: #718096;
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 768px) {
+        body {
+          padding: 1rem;
+        }
+
+        .header {
+          padding: 1.5rem;
+        }
+
+        .header h1 {
+          font-size: 2rem;
+        }
+
+        .main-content {
+          padding: 1.5rem;
+        }
+
+        .example-list {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🍳 Recipe Researcher</h1>
+        <p>Powered by AI Recipe Agent</p>
+        <div class="agent-status">
+          <div class="status-dot"></div>
+          <span>AI Agent Online</span>
+        </div>
+      </div>
+
+      <div class="main-content">
+        <div class="examples">
+          <h3>💡 Try these examples:</h3>
+          <div class="example-list">
+            <div class="example-item" onclick="fillExample('Chocolate cake', 'low sugar')">
+              <div class="example-query">Chocolate cake</div>
+              <div class="example-constraint">low sugar</div>
+            </div>
+            <div class="example-item" onclick="fillExample('Chicken stir fry', 'gluten free')">
+              <div class="example-query">Chicken stir fry</div>
+              <div class="example-constraint">gluten free</div>
+            </div>
+            <div class="example-item" onclick="fillExample('Pasta primavera', 'vegan')">
+              <div class="example-query">Pasta primavera</div>
+              <div class="example-constraint">vegan</div>
+            </div>
+            <div class="example-item" onclick="fillExample('Salmon dinner', 'keto')">
+              <div class="example-query">Salmon dinner</div>
+              <div class="example-constraint">keto</div>
+            </div>
+          </div>
+        </div>
+
+        <form id="recipe-form" class="form-section">
+          <h2>🔍 Ask the Recipe Agent</h2>
+          <div class="form-group">
+            <label for="query">What would you like to cook?</label>
+            <input type="text" id="query" name="query" placeholder="e.g., Chocolate cake, Chicken parmesan, Sushi rolls..." required />
+          </div>
+          <div class="form-group">
+            <label for="constraint">Any dietary constraints or preferences?</label>
+            <input type="text" id="constraint" name="constraint" placeholder="e.g., low carb, vegan, gluten-free, keto..." required />
+          </div>
+          <button type="submit" class="submit-btn" id="submit-btn">
+            <span id="btn-text">🤖 Ask AI Agent</span>
+          </button>
+        </form>
+
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+          <p>AI Agent is thinking and researching your recipe...</p>
+          <small>This may take a few moments as our AI carefully analyzes and creates your perfect recipe.</small>
+        </div>
+
+        <div class="response-section">
+          <h2>📋 Agent Response</h2>
+          <div class="response-card" id="response">Ready to help you cook something amazing! Fill out the form above and let our AI agent work its magic.</div>
+        </div>
+
+        <div class="features">
+          <div class="feature">
+            <div class="feature-icon">🧠</div>
+            <h4>AI-Powered</h4>
+            <p>Advanced reasoning agent that understands your needs</p>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">⚡</div>
+            <h4>Smart Corrections</h4>
+            <p>Self-correcting loop ensures accurate, safe recipes</p>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">🎯</div>
+            <h4>Constraint Aware</h4>
+            <p>Respects dietary needs and cooking preferences</p>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">🔄</div>
+            <h4>Transparent Process</h4>
+            <p>See exactly how the AI thinks and refines recipes</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const form = document.getElementById("recipe-form");
+      const responseNode = document.getElementById("response");
+      const loading = document.getElementById("loading");
+      const submitBtn = document.getElementById("submit-btn");
+      const btnText = document.getElementById("btn-text");
+
+      function fillExample(query, constraint) {
+        document.getElementById('query').value = query;
+        document.getElementById('constraint').value = constraint;
+      }
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const query = form.query.value.trim();
+        const constraint = form.constraint.value.trim();
+
+        if (!query || !constraint) return;
+
+        // Disable button immediately - no retries allowed
+        submitBtn.disabled = true;
+        btnText.textContent = '🤖 Agent Working...';
+
+        // Show loading state
+        loading.classList.add('show');
+        responseNode.textContent = 'AI Agent is analyzing your request...';
+        responseNode.className = 'response-card';
+
+        const payload = { query, constraint };
+
+        try {
+          const response = await fetch("/api/ask", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const json = await response.json();
+
+          if (json.error) {
+            responseNode.textContent = `❌ Error: ${json.error}`;
+            responseNode.className = 'response-card error';
+          } else {
+            // Format the response nicely
+            let formattedResponse = '';
+
+            if (json.agent_response) {
+              formattedResponse = json.agent_response;
+            } else {
+              formattedResponse = JSON.stringify(json, null, 2);
+            }
+
+            responseNode.textContent = `✅ AI Agent Response:\n\n${formattedResponse}`;
+            responseNode.className = 'response-card success';
+          }
+
+        } catch (error) {
+          responseNode.textContent = `❌ Request failed: ${error.message}`;
+          responseNode.className = 'response-card error';
+        } finally {
+          // Hide loading state and re-enable button
+          loading.classList.remove('show');
+          submitBtn.disabled = false;
+          btnText.textContent = '🤖 Ask AI Agent';
+        }
+      });
+    </script>
+  </body>
+</html>
+

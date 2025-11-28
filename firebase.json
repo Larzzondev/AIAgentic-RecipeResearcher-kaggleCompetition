@@ -1,0 +1,25 @@
+{
+  "hosting": {
+    "site": "recipe-researcher-2025",
+    "public": "capstone-agent/public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/api/ask",
+        "function": "agentProxy"
+      }
+    ]
+  },
+  "functions": {
+    "source": "capstone-agent/functions",
+    "runtime": "python312",
+    "memory": "512MiB",
+    "timeoutSeconds": 540,
+    "maxInstances": 1
+  }
+}
+
